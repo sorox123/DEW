@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/DEW.App/">
+    <Project Path="DEW.App/Dew.App.csproj" />
+  </Folder>
+  <Folder Name="/DEW.Core/">
+    <Project Path="DEW.Core/Dew.Core.csproj" />
+  </Folder>
+</Solution>
