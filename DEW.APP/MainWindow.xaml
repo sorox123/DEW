@@ -8,28 +8,46 @@
         Title="MainWindow" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="*" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="200" />
-            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" /> <!-- 0 = buttons -->
+            <RowDefinition Height="*" /> <!-- 1 = entry list -->
+            <RowDefinition Height="Auto" /> <!-- 2: key box-->
+            <RowDefinition Height="200" /> <!-- 3: raw text-->
         </Grid.RowDefinitions>
 
-        <ListBox Grid.Row="0" ItemsSource="{Binding Entries}" DisplayMemberPath="Key"
-                    SelectedItem="{Binding SelectedEntry}" />
-
-        <TextBox Grid.Row="1" Text="{Binding EditingKey, UpdateSourceTrigger=PropertyChanged}"
-                    LostFocus="KeyTextBox_LostFocus" Margin="0,5,0,5" />
-
-        <TextBox Grid.Row="2" Text="{Binding SelectedEntry.RawText}"
-                    TextWrapping="Wrap" AcceptsReturn="True" />
-
-        <StackPanel Grid.Row="3" Orientation="Horizontal">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,5">
             <Button Content="Load" Command="{Binding LoadCommand}" Margin="0,0,5,0" />
             <Button Content="Create Entry" Command="{Binding CreateEntryCommand}" Margin="0,0,5,0" />
             <Button Content="Create/Edit Entry" Command="{Binding CreateEditEntryCommand}" Margin="0,0,5,0" />
+            <Button Content="Delete" Command="{Binding DeleteCommand}" Margin="0,0,5,0" />
             <Button Content="Save" Command="{Binding SaveCommand}" Margin="0,0,5,0" />
             <Button Content="Save As" Command="{Binding SaveAsCommand}" Margin="0,0,5,0" />
             <Button Content="New" Command="{Binding NewCommand}" />
         </StackPanel>
+
+        <ListBox Grid.Row="1" ItemsSource="{Binding Entries}" DisplayMemberPath="Key"
+                    SelectedItem="{Binding SelectedEntry}">
+            <ListBox.ItemContainerStyle>
+                <Style TargetType="ListBoxItem">
+                    <EventSetter Event="PreviewMouseRightButtonDown" Handler="ListBoxItem_RightClick" />
+                </Style>
+            </ListBox.ItemContainerStyle>
+            <ListBox.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Duplicate Entry" Command="{Binding DuplicateCommand}" />
+                    <MenuItem Header="Copy Value" Command="{Binding CopyValueCommand}" />
+                    <Separator />
+                    <MenuItem Header="Cut Entry" Command="{Binding CutCommand}" />
+                    <MenuItem Header="Paste Entry" Command="{Binding PasteCommand}" />
+                    <Separator />
+                    <MenuItem Header="Delete Entry" Command="{Binding DeleteCommand}" />
+                </ContextMenu>
+            </ListBox.ContextMenu>
+        </ListBox>
+
+        <TextBox Grid.Row="2" Text="{Binding EditingKey, UpdateSourceTrigger=PropertyChanged}"
+                    LostFocus="KeyTextBox_LostFocus" Margin="0,2,0,2" />
+
+        <TextBox Grid.Row="3" Text="{Binding SelectedEntry.RawText}"
+                    TextWrapping="Wrap" AcceptsReturn="True" />
     </Grid>
 </Window>

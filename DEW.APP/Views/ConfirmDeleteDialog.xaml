@@ -1,0 +1,15 @@
+<Window x:Class="DEW.App.Views.ConfirmDeleteDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Delete Entry" SizeToContent="WidthAndHeight"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        ShowInTaskbar="False">
+    <StackPanel Margin="15">
+        <TextBlock x:Name="MessageText" TextWrapping="Wrap" MaxWidth="320" Margin="0,0,0,10" />
+        <CheckBox x:Name="DontAskCheckBox" Content="Don't ask me again this session" Margin="0,0,0,15" />
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <Button Content="Delete" IsDefault="True" Width="75" Margin="0,0,5,0" Click="Delete_Click" /> <!-- makes enter key hit delete-->
+            <Button Content="Cancel" IsCancel="True" Width="75" /> <!-- Creates cancel button and allows esc to cancel-->
+        </StackPanel>
+    </StackPanel>
+</Window>

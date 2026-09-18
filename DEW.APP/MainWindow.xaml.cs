@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using DEW.App.ViewModels;
+using System.Text;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -8,7 +9,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
-using DEW.App.ViewModels;
+
 
 namespace DEW.App;
 
@@ -28,6 +29,15 @@ public partial class MainWindow : Window
         if (DataContext is MainViewModel vm)
         {
             vm.CommitKeyChange();
+        }
+    }
+
+    private void ListBoxItem_RightClick(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is ListBoxItem item)
+        {
+            item.Focus(); //first, so half-typed key commits. Acts like left-click
+            item.IsSelected = true;
         }
     }
 }
