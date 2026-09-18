@@ -2,7 +2,7 @@
 using System.Data;
 using System.Windows;
 
-namespace DEW.APP;
+namespace DEW.App;
 
 /// <summary>
 /// Interaction logic for App.xaml
