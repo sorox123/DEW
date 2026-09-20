@@ -5,4 +5,5 @@
   <Folder Name="/DEW.Core/">
     <Project Path="DEW.Core/Dew.Core.csproj" />
   </Folder>
+  <Project Path="DEW.Tests/DEW.Tests.csproj" />
 </Solution>

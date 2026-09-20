@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DEW.App"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="450" Width="800"
+        Closing="Window_Closing">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" /> <!-- 0 = buttons -->
@@ -15,20 +16,25 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,5">
-            <Button Content="Load" Command="{Binding LoadCommand}" Margin="0,0,5,0" />
-            <Button Content="Create Entry" Command="{Binding CreateEntryCommand}" Margin="0,0,5,0" />
-            <Button Content="Create/Edit Entry" Command="{Binding CreateEditEntryCommand}" Margin="0,0,5,0" />
-            <Button Content="Delete" Command="{Binding DeleteCommand}" Margin="0,0,5,0" />
-            <Button Content="Save" Command="{Binding SaveCommand}" Margin="0,0,5,0" />
-            <Button Content="Save As" Command="{Binding SaveAsCommand}" Margin="0,0,5,0" />
-            <Button Content="New" Command="{Binding NewCommand}" />
+            <Button Content="Load" ToolTip="Load content from JSON file" Command="{Binding LoadCommand}" Margin="0,0,5,0" />
+            <Button Content="Create Entry" ToolTip="Create new entry within current JSON file" Command="{Binding CreateEntryCommand}" Margin="0,0,5,0" />
+            <Button Content="Create/Edit Entry" ToolTip="Create new entry within current JSON file and open editor" Command="{Binding CreateEditEntryCommand}" Margin="0,0,5,0" />
+            <Button Content="Delete" ToolTip="Delete currently selected entry" Command="{Binding DeleteCommand}" Margin="0,0,5,0" />
+            <Button Content="▲" ToolTip="Move up" Command="{Binding MoveUpCommand}" Width ="28" Margin="0,0,5,0" />
+            <Button Content="▼" ToolTip="Move down" Command="{Binding MoveDownCommand}" Width="28" Margin="0,0,5,0" />
+            <Button Content="Save" ToolTip="Save changes to current JSON file" Command="{Binding SaveCommand}" Margin="0,0,5,0" />
+            <Button Content="Save As" ToolTip="Save current JSON file as" Command="{Binding SaveAsCommand}" Margin="0,0,5,0" />
+            <Button Content="New" ToolTip="Create a new, blank JSON file" Command="{Binding NewCommand}" />
         </StackPanel>
 
-        <ListBox Grid.Row="1" ItemsSource="{Binding Entries}" DisplayMemberPath="Key"
-                    SelectedItem="{Binding SelectedEntry}">
+        <ListBox x:Name="EntriesListBox" Grid.Row="1" ItemsSource="{Binding Entries}" DisplayMemberPath="Key"
+                    SelectedItem="{Binding SelectedEntry}"
+                    AllowDrop="True" Drop="ListBox_Drop" DragOver="ListBox_DragOver">
             <ListBox.ItemContainerStyle>
                 <Style TargetType="ListBoxItem">
                     <EventSetter Event="PreviewMouseRightButtonDown" Handler="ListBoxItem_RightClick" />
+                    <EventSetter Event="PreviewMouseLeftButtonDown" Handler="ListBoxItem_PreviewMouseLeftButtonDown" />
+                    <EventSetter Event="PreviewMouseMove" Handler="ListBoxItem_PreviewMouseMove" />
                 </Style>
             </ListBox.ItemContainerStyle>
             <ListBox.ContextMenu>

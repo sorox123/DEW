@@ -4,6 +4,7 @@ using DEW.Core.Models;
 using DEW.Core.Services;
 using Microsoft.Win32;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -26,6 +27,33 @@ public class MainViewModel : INotifyPropertyChanged
     private DialogueEntry? _cutBuffer; //holds cut content in context
 
     private bool CanPaste() => _cutBuffer != null; //makes sure there isn't nothing to paste
+
+    //bools check to make sure something is selected and the selected entry's index isn't:
+    private bool CanMoveUp() => SelectedEntry != null && Entries.IndexOf(SelectedEntry) > 0; //less than 0
+    private bool CanMoveDown() => SelectedEntry != null && Entries.IndexOf(SelectedEntry) < Entries.Count -1; //already at the bottom of the list
+
+    private void MoveUp() => MoveSelected(-1);
+    private void MoveDown() => MoveSelected(1);
+
+    private void MoveSelected(int offset)
+    {
+        if (SelectedEntry == null) return;
+
+        int index = Entries.IndexOf(SelectedEntry);
+        int newIndex = index + offset;
+        MoveEntry(index, newIndex);
+    }
+
+    //separate from MoveSelected to allow click and drag
+    public void MoveEntry(int from, int to)
+    {
+        if (from < 0 || from >= Entries.Count) return;
+        if (to < 0 || to >= Entries.Count) return;
+        if (from == to) return;
+
+        Entries.Move(from, to);
+        CommandManager.InvalidateRequerySuggested();
+    }
 
     private void Cut()
     {
@@ -74,6 +102,38 @@ public class MainViewModel : INotifyPropertyChanged
         }
     }
 
+    public bool ConfirmDiscardChanges()
+    {
+        if (!IsDirty) return true;
+
+        var result = MessageBox.Show(
+                "You have unsaved changes. Save before continuing?",
+                "Unsaved Changes",
+                MessageBoxButton.YesNoCancel,
+                MessageBoxImage.Warning);
+
+        switch (result)
+        {
+            case MessageBoxResult.Yes:
+                if (_currentFilePath is null)
+                    SaveAs();
+                else
+                    Save();
+                return !IsDirty; //still dirty means the save didn't actually happen
+            case MessageBoxResult.No:
+                return true; //discard changes, proceed
+            default:
+                return false; // cancel: abort whatever triggered this
+        }
+    }
+
+    private bool _isDirty;
+    public bool IsDirty
+    {
+        get => _isDirty;
+        set { _isDirty = value; OnPropertyChanged(); }
+    }
+
     private string _editingKey = string.Empty;
     public string EditingKey
     {
@@ -92,8 +152,11 @@ public class MainViewModel : INotifyPropertyChanged
     public ICommand CopyValueCommand { get; }
     public ICommand CutCommand { get; }
     public ICommand PasteCommand { get; }
+    public ICommand MoveUpCommand { get; }
+    public ICommand MoveDownCommand { get; }
+    
 
-    // draws content to the VM
+    // draws content to the VM using this constructor
     public MainViewModel()
     {
         SaveCommand = new RelayCommand(Save, CanSave);
@@ -107,6 +170,9 @@ public class MainViewModel : INotifyPropertyChanged
         CopyValueCommand = new RelayCommand(CopyValue, HasSelection);
         CutCommand = new RelayCommand(Cut, HasSelection);
         PasteCommand = new RelayCommand(Paste, CanPaste);
+        MoveUpCommand = new RelayCommand(MoveUp, CanMoveUp);
+        MoveDownCommand = new RelayCommand(MoveDown, CanMoveDown);
+        Entries.CollectionChanged += Entries_CollectionChanged;
     }
 
     private bool CanSave() => Entries.Count > 0; // when Entries are empty, lock saving
@@ -204,9 +270,12 @@ public class MainViewModel : INotifyPropertyChanged
 
     private void New()
     {
+        if (!ConfirmDiscardChanges()) return;
+
         _currentFilePath = null;
         Entries.Clear();
         CommandManager.InvalidateRequerySuggested(); // makes Save/Save As grayed out and unclickable
+        IsDirty = false; //creating new from either loaded file or new file, is technically a change, this sets that to false
     }
 
     private void LoadFile(string path)
@@ -218,10 +287,13 @@ public class MainViewModel : INotifyPropertyChanged
             Entries.Add(entry); // appends dialogue entries to Entries for VM
         }
         CommandManager.InvalidateRequerySuggested(); //recheck every command's CanExecute, without this, buttons would immediately become clickable
+        IsDirty = false; //loading from New, techinically flags changes. This sets that to false
     }
 
     private void Load()
     {
+if (!ConfirmDiscardChanges()) return;
+
         var dialog = new OpenFileDialog //Opens files with attached filter
         {
             Filter = "JSON files (*.json)|*.json"
@@ -259,6 +331,7 @@ public class MainViewModel : INotifyPropertyChanged
     {
         if (_currentFilePath is null) return; // if somehow able to save, button does nothing
         DialogueFileSaver.Save(Entries.ToList(), _currentFilePath);
+        IsDirty = false;
     }
 
     private void SaveAs()
@@ -275,6 +348,32 @@ public class MainViewModel : INotifyPropertyChanged
             //saves entries (and changes) to file at _currentFilePath
             _currentFilePath = dialog.FileName;
             DialogueFileSaver.Save(Entries.ToList(), _currentFilePath);
+            IsDirty = false;
+        }
+    }
+
+    private void Entries_CollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        if (e.NewItems != null)
+        {
+            foreach (DialogueEntry entry in e.NewItems)
+                entry.PropertyChanged += Entry_PropertyChanged;
+        }
+
+        if (e.OldItems != null)
+        {
+            foreach (DialogueEntry entry in e.OldItems)
+                entry.PropertyChanged -= Entry_PropertyChanged;
+        }
+
+        IsDirty = true;
+    }
+
+    private void Entry_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(DialogueEntry.Key) || e.PropertyName == nameof(DialogueEntry.RawText))
+        {
+            IsDirty = true;
         }
     }
 
