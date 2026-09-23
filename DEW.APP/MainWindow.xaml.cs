@@ -1,5 +1,6 @@
 ﻿using DEW.App.ViewModels;
 using DEW.App.Helpers;
+using DEW.Core;
 using DEW.Core.Models;
 using System.Text;
 using System.Windows;
@@ -119,5 +120,84 @@ public partial class MainWindow : Window
         {
             e.Cancel = true;
         }
+    }
+
+    private void RawTextBox_TextChanged(object sender, TextChangedEventArgs e)
+    {
+        UpdateHighlightPreview(RawTextBox.Text);
+    }
+
+    private void UpdateHighlightPreview(string rawText) //rebuild entire preview from scratch each time text changes
+    {
+        var document = new FlowDocument();
+        var paragraph = new Paragraph();
+
+        var tokens = DialogueTokenizer.Tokenize(rawText ?? string.Empty); //tokenize raw text
+
+        foreach (var token in tokens) //for each token, create colored "run" (span of text, such as a word instead of painting whole sentence)
+        {
+            var run = new Run(token.RawText) { Foreground = Brushes.Black };
+            var entry = SyntaxRegistry.Resolve(token.RawText);
+
+            if (entry != null) //if entry isn't null, display info on json formatting
+            {
+                run.Background = BackgroundForKind(entry.Kind); //color based on kind
+                ToolTipService.SetToolTip(run, $"{entry.FriendlyName}\n{entry.Description}");
+            }
+            else if (token.Kind == SyntaxKind.Unknown) //if syntax is unknown, flag it and inform user via tooltip
+            {
+                run.Background = BackgroundForKind(SyntaxKind.Unknown); //colors unknowns in gray
+                run.ToolTip = "Unrecognized syntax - kept as-is.";
+            }
+
+            paragraph.Inlines.Add(run);
+        }
+
+        document.Blocks.Add(paragraph);
+        HighlightPreview.Document = document;
+    }
+
+    private static Brush BackgroundForKind(SyntaxKind kind) //highlighting syntax based off of its kind
+    {
+        switch (kind)
+        {
+            case SyntaxKind.Inline: //if syntax is Inline (eg: name replacements), highlight blue
+                return Brushes.LightBlue;
+            case SyntaxKind.LineLevel: //if syntax is LineLevel (eg: portrait), highlight purple
+                return Brushes.Plum;
+            case SyntaxKind.Structural: //if syntax is Structural (eg: end conversation), highlight dark orange
+                return Brushes.Moccasin;
+            case SyntaxKind.Splitter: //if syntax is Splitter (eg: gender-based split), highlight dark cyan
+                return Brushes.PaleTurquoise;
+            case SyntaxKind.Portrait: //if syntax is Portrait, highlight palegreen
+                return Brushes.PaleGreen;
+            case SyntaxKind.Unknown:
+                return Brushes.Gainsboro; //light highlighting to catch eye
+            default:
+                return Brushes.Transparent; //plain text, no highlight
+        }
+    }
+
+    private void HighlightPreview_MouseMove(object sender, MouseEventArgs e)
+    {
+        var mousePos = e.GetPosition(HighlightPreview);
+        var pointer = HighlightPreview.GetPositionFromPoint(mousePos, snapToText: true);
+
+        if (pointer?.Parent is Run run && run.ToolTip is string tooltipText)
+        {
+            TokenTooltipText.Text = tooltipText;
+            TokenTooltipPopup.HorizontalOffset = mousePos.X + 12;
+            TokenTooltipPopup.VerticalOffset = mousePos.Y + 12;
+            TokenTooltipPopup.IsOpen = true;
+        }
+        else
+        {
+            TokenTooltipPopup.IsOpen = false;
+        }
+    }
+
+    private void HighlightPreview_MouseLeave(object sender, MouseEventArgs e)
+    {
+        TokenTooltipPopup.IsOpen = false;
     }
 }

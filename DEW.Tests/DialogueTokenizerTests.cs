@@ -23,5 +23,32 @@ namespace DEW.Tests
 
             Assert.Equal(original, rebuilt);
         }
+
+        [Theory]
+        [InlineData("$c 0.9#A#B", "$c 0.9")]
+        [InlineData("$c0.9#A#B", "$c0.9")]
+        [InlineData("$c 0.75#A#B", "$c 0.75")]
+        public void Tokenize_ChanceSplit_CapturesProbabilityInRawText(string input, string expectedRaw)
+        {
+            var tokens = DialogueTokenizer.Tokenize(input);
+
+            Assert.NotEmpty(tokens);
+            Assert.Equal(SyntaxKind.Structural, tokens[0].Kind);
+            Assert.Equal(expectedRaw, tokens[0].RawText);
+        }
+
+        [Theory]
+        [InlineData("$action AddMoney 500", "$action AddMoney 500")]
+        [InlineData("$action AddMoney 500#Here you go!", "$action AddMoney 500")]
+        [InlineData("$t cc_Complete 7", "$t cc_Complete 7")]
+        [InlineData("$v 1234 false false#Come with me.", "$v 1234 false false")]
+        public void Tokenize_ArgCommand_CapturesArgsUntilHash(string input, string expectedRaw)
+        {
+            var tokens = DialogueTokenizer.Tokenize(input);
+
+            Assert.NotEmpty(tokens);
+            Assert.Equal(SyntaxKind.Structural, tokens[0].Kind);
+            Assert.Equal(expectedRaw, tokens[0].RawText);
+        }
     }
 }

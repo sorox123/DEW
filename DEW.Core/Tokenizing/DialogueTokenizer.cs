@@ -44,6 +44,14 @@ namespace DEW.Core
                 continue;
                 }
 
+                if (c == '^')
+                {
+                    FlushText();
+                    tokens.Add(new Token { Kind = SyntaxKind.Splitter, RawText = "^" });
+                    i++;
+                    continue;
+                }
+
                 if (c == '#')
                 {
                     FlushText();
@@ -93,7 +101,14 @@ namespace DEW.Core
             return tokens;
         }
 
-        //currently recognizes $b, $e, $k and portrait tags ($0 - $9, $h, $s, $u, $l, $a), everything else starting with $ is unknown for now
+        /*
+        Recognizes:
+            $b, $e, $k                          -Box control (LineLevel)
+            $c <float>                          -Chance split (Structural)
+            $action, $t, $v + args              -Argument commands, args run next to # (Structural)
+            $0-$13, $h, $s, $u, $l, $a          -portrait commands (Portrait)
+        Anything else starting with $ is Unknown for now.
+        */
         private static bool TryMatchDollarMarker(string raw, int pos, [NotNullWhen(true)] out Token? token, out int length)
         {
             token = null;
@@ -110,14 +125,46 @@ namespace DEW.Core
                 return true;
             }
 
+            if (next == 'c')
+            {
+                int start = pos;
+                int j = pos + 2;//past "$c"
+                while (j < raw.Length && raw[j] == ' ') j++; //skips space
+                while (j < raw.Length && (char.IsDigit(raw[j]) || raw[j] == '.')) j++; //point to float
+
+                token = new Token { Kind = SyntaxKind.Structural, RawText = raw.Substring(start, j - start) };
+                length = j - start;
+                return true;
+            }
+            //$action MUST come before portraits since default is to pick whichever is true first. Portrait has $a and would return true first otherwise
+            if (TryMatchArgCommand(raw, pos, "$action", out token, out length)) return true;
+            if (TryMatchArgCommand(raw, pos, "$t", out token, out length)) return true;
+            if (TryMatchArgCommand(raw, pos, "$v", out token, out length)) return true;
+
             if (char.IsDigit(next) || PortraitLetters.Contains(next))
             {
-                token = new Token { Kind = SyntaxKind.LineLevel, RawText = raw.Substring(pos, 2) };
+                token = new Token { Kind = SyntaxKind.Portrait, RawText = raw.Substring(pos, 2) };
                 length = 2;
                 return true;
             }
 
             return false;
+        }
+
+        private static bool TryMatchArgCommand(string raw, int pos, string name,
+            [NotNullWhen(true)] out Token? token, out int length)
+        {
+            token = null;
+            length = 0;
+
+            if (!raw.Substring(pos).StartsWith(name)) return false;
+
+            int j = pos + name.Length;
+            while (j < raw.Length && raw[j] != '#') j++;
+
+            token = new Token { Kind = SyntaxKind.Structural, RawText = raw.Substring(pos, j - pos) };
+            length = j - pos;
+            return true;
         }
     }
 }

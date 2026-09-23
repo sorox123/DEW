@@ -6,6 +6,8 @@ namespace DEW.Core
         Inline,         //embedded in running text (eg: %pet to mark pet name)
         LineLevel,      //controls box itself, portrait tags also go here (eg. $b to indicate new dialog box, $e to indicate next time spoken to.)
         Structural,     //owns child text/branches
-        Unknown         //unrecognized syntax -- opaque pass-through
+        Unknown,        //unrecognized syntax -- opaque pass-through
+        Splitter,        //splits data based on various conditions (eg: ^ for male/female dialogue)
+        Portrait
     }
 }

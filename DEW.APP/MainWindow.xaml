@@ -13,6 +13,7 @@
             <RowDefinition Height="*" /> <!-- 1 = entry list -->
             <RowDefinition Height="Auto" /> <!-- 2: key box-->
             <RowDefinition Height="200" /> <!-- 3: raw text-->
+            <RowDefinition Height="150" /> <!-- 4: highlighted preview -->
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,5">
@@ -53,7 +54,24 @@
         <TextBox Grid.Row="2" Text="{Binding EditingKey, UpdateSourceTrigger=PropertyChanged}"
                     LostFocus="KeyTextBox_LostFocus" Margin="0,2,0,2" />
 
-        <TextBox Grid.Row="3" Text="{Binding SelectedEntry.RawText}"
-                    TextWrapping="Wrap" AcceptsReturn="True" />
+        <TextBox x:Name="RawTextBox" Grid.Row="3" Text="{Binding SelectedEntry.RawText}"
+                    TextWrapping="Wrap" AcceptsReturn="True"
+                    TextChanged="RawTextBox_TextChanged" />
+
+        <RichTextBox x:Name="HighlightPreview" Grid.Row="4"
+                    IsReadOnly="True"
+                    VerticalScrollBarVisibility="Auto"
+                    Background="#FFF5F5F5"
+                    Margin="0,2,0,0"
+                    MouseMove="HighlightPreview_MouseMove"
+                    MouseLeave="HighlightPreview_MouseLeave" />
+
+        <Popup x:Name="TokenTooltipPopup" AllowsTransparency="True"
+                Placement="Relative" PlacementTarget="{Binding ElementName=HighlightPreview}"
+                IsOpen="False">
+            <Border Background="LightYellow" BorderBrush="Gray" BorderThickness="1" Padding="4" CornerRadius="2">
+                <TextBlock x:Name="TokenTooltipText" MaxWidth="300" TextWrapping="Wrap" />
+            </Border>
+        </Popup>
     </Grid>
 </Window>
