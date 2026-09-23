@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using System.Text;
 
 
@@ -8,6 +9,11 @@ namespace DEW.Core
     public static class DialogueTokenizer
     {
         private static readonly HashSet<char> PortraitLetters = new HashSet<char> { 'h', 's', 'u', 'l', 'a' };
+
+        private static readonly string[] ArgCommands = //readonly makes this run only once
+            new[] { "$action", "$t", "$v" }
+                .OrderByDescending(name => name.Length) //orders the string array by lamda order (name length big to small)
+                .ToArray();
 
         public static List<Token> Tokenize(string raw)
         {
@@ -27,6 +33,16 @@ namespace DEW.Core
             while (i < raw.Length)
             {
                 char c = raw[i];
+
+                // check for %revealtaste which is helped by TryMatchArgCommand.
+                // propery syntax is %revealtaste either at end of dialogue text or up against # separator, so TryMatchArgCommand fits
+                if (c == '%' && TryMatchArgCommand(raw, i, "%revealtaste", out Token? cmd, out int cmdLength))
+                {
+                    FlushText();
+                    tokens.Add(cmd);
+                    i += cmdLength;
+                    continue;
+                }
 
                 if (c == '%' && i == 0)
                 {
@@ -102,7 +118,7 @@ namespace DEW.Core
         }
 
         /*
-        Recognizes:
+        Helper that Recognizes:
             $b, $e, $k                          -Box control (LineLevel)
             $c <float>                          -Chance split (Structural)
             $action, $t, $v + args              -Argument commands, args run next to # (Structural)
@@ -136,10 +152,10 @@ namespace DEW.Core
                 length = j - start;
                 return true;
             }
-            //$action MUST come before portraits since default is to pick whichever is true first. Portrait has $a and would return true first otherwise
-            if (TryMatchArgCommand(raw, pos, "$action", out token, out length)) return true;
-            if (TryMatchArgCommand(raw, pos, "$t", out token, out length)) return true;
-            if (TryMatchArgCommand(raw, pos, "$v", out token, out length)) return true;
+
+            //piroritizes via lambda, so $action doesn't stop reading at $a (the portrait call for angry)
+            foreach (var name in ArgCommands)
+                if (TryMatchArgCommand(raw, pos, name, out token, out length)) return true;
 
             if (char.IsDigit(next) || PortraitLetters.Contains(next))
             {
@@ -159,7 +175,11 @@ namespace DEW.Core
 
             if (!raw.Substring(pos).StartsWith(name)) return false;
 
-            int j = pos + name.Length;
+            int end = pos + name.Length; //matches name of $ arg
+            if (end < raw.Length && char.IsLetter(raw[end])) return false; //checks the next character so it doesn't immediately match
+
+            //args run until next # or end of string
+            int j = end;
             while (j < raw.Length && raw[j] != '#') j++;
 
             token = new Token { Kind = SyntaxKind.Structural, RawText = raw.Substring(pos, j - pos) };

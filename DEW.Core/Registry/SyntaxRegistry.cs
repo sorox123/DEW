@@ -35,6 +35,9 @@ namespace DEW.Core
             Description = "Runs a trigger action string. Must be placed at the end of dialogue and can only be chained with other $action when separated by #.",
             Kind = SyntaxKind.Structural},
 
+            new RegistryEntry { Pattern = "%revealtaste", FriendlyName = "Reveal Item Preference",
+            Description = "Reveals an NPC's gift preference for an item.", Kind = SyntaxKind.Structural},
+
             new RegistryEntry { Pattern = "$t", FriendlyName = "Topic Setter",
             Description = "Adds a conversation topic for the next [X] days.", Kind = SyntaxKind.Structural},
 
@@ -117,9 +120,9 @@ namespace DEW.Core
         public static RegistryEntry? Resolve(string rawText) //exact match first, then command-name fallback
         {
             var exact = Lookup(rawText);
-            if (exact != null) return exact;
+            if (exact != null) return exact; //try look up exact match and if successful, return it
 
-            if (!rawText.StartsWith("$")) return null;
+            if (!(rawText.StartsWith("$") || rawText.StartsWith("%"))) return null; //check to see if it starts with $
 
             int j = 1;
             while (j < rawText.Length && char.IsLetter(rawText[j])) j++; //walk through command letter

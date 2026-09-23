@@ -30,7 +30,7 @@ namespace DEW.Tests
         [InlineData("$q")]
         [InlineData("notarealpattern")]
         [InlineData("$c 0.9")]
-
+        
         public void Lookup_UnknownPattern_ReturnsNull(string pattern)
         {
             var entry = SyntaxRegistry.Lookup(pattern);
@@ -76,6 +76,7 @@ namespace DEW.Tests
         [InlineData("$action AddMoney 500", "Action Handler")]
         [InlineData("$c 0.9", "Chance Split")]
         [InlineData("$c0.9", "Chance Split")]
+        [InlineData("%revealtaste:Abigail:(O)66", "Reveal Item Preference")]
         public void Resolve_ArgCommand_FallsBackToCommandName(string rawText, string expectedFriendlyName)
         {
             var entry = SyntaxRegistry.Resolve(rawText);
