@@ -36,7 +36,7 @@ namespace DEW.Core
 
                 // check for %revealtaste which is helped by TryMatchArgCommand.
                 // propery syntax is %revealtaste either at end of dialogue text or up against # separator, so TryMatchArgCommand fits
-                if (c == '%' && TryMatchArgCommand(raw, i, "%revealtaste", out Token? cmd, out int cmdLength))
+                if (c == '%' && TryMatchArgCommand(raw, i, "%revealtaste", out Token? cmd, out int cmdLength, "#"))
                 {
                     FlushText();
                     tokens.Add(cmd);
@@ -168,7 +168,8 @@ namespace DEW.Core
         }
 
         private static bool TryMatchArgCommand(string raw, int pos, string name,
-            [NotNullWhen(true)] out Token? token, out int length)
+            [NotNullWhen(true)] out Token? token, out int length,
+            string stopChars = "#")
         {
             token = null;
             length = 0;
@@ -178,9 +179,9 @@ namespace DEW.Core
             int end = pos + name.Length; //matches name of $ arg
             if (end < raw.Length && char.IsLetter(raw[end])) return false; //checks the next character so it doesn't immediately match
 
-            //args run until next # or end of string
+            //args run until next or until stopchar
             int j = end;
-            while (j < raw.Length && raw[j] != '#') j++;
+            while (j < raw.Length && stopChars.IndexOf(raw[j]) < 0) j++;
 
             token = new Token { Kind = SyntaxKind.Structural, RawText = raw.Substring(pos, j - pos) };
             length = j - pos;
