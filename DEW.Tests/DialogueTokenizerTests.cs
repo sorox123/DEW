@@ -101,6 +101,18 @@ namespace DEW.Tests
         [Fact]
         public void Tokenize_RevealTaste_SingleStructuralToken()
         {
+            string raw = "%revealtaste:Abigail:(O)66#$b#Hi.";
+
+            var tokens = DialogueTokenizer.Tokenize(raw);
+
+            Assert.Equal(SyntaxKind.Structural, tokens[0].Kind);
+            Assert.Equal("%revealtaste:Abigail:(O)66", tokens[0].RawText);
+            Assert.Equal("#", tokens[1].RawText);
+        }
+
+        [Fact]
+        public void Tokenize_RevealTaste_Chained_SplitsIntoTwoTokens()
+        {
             string raw = ("%revealtaste:Abigail:(O)66%revealtaste:Abigail:(O)72#Hi");
 
             var tokens = DialogueTokenizer.Tokenize(raw);
@@ -109,6 +121,17 @@ namespace DEW.Tests
             Assert.Equal(SyntaxKind.Structural, tokens[1].Kind); //checks to see if the 2nd token matches the syntaxkind (both tokens should match this kind, this is the only test we need)
             Assert.Equal("%revealtaste:Abigail:(O)72", tokens[1].RawText); //checks to see if %revealtaste:Abigail:72 is being tokenized properly
             Assert.Equal("#", tokens[2].RawText); //checks to make sure # is its own token
+        }
+
+        [Fact]
+        public void Tokenize_Portrait_MultiDigit_IsOneToken()
+        {
+            string raw = "Hi.$12";
+
+            var tokens = DialogueTokenizer.Tokenize(raw);
+
+            Assert.Equal("$12", tokens[1].RawText);
+            Assert.Equal(SyntaxKind.Portrait, tokens[1].Kind);
         }
     }
 }

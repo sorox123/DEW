@@ -166,7 +166,18 @@ namespace DEW.Core
             foreach (var name in ArgCommands)
                 if (TryMatchArgCommand(raw, pos, name, out token, out length)) return true;
 
-            if (char.IsDigit(next) || PortraitLetters.Contains(next))
+            if (char.IsDigit(next)) 
+            {
+                int j = pos + 1;
+                while (j < raw.Length && char.IsDigit(raw[j]))
+                    j++;
+
+                token = new Token { Kind = SyntaxKind.Portrait, RawText = raw.Substring(pos, j - pos) };
+                length = j - pos;
+                return true;
+            }
+
+            if (PortraitLetters.Contains(next))
             {
                 token = new Token { Kind = SyntaxKind.Portrait, RawText = raw.Substring(pos, 2) };
                 length = 2;
