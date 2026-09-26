@@ -78,6 +78,7 @@ namespace DEW.Tests
         [InlineData("$c0.9", "Chance Split")]
         [InlineData("%revealtaste:Abigail:(O)66", "Reveal Item Preference")]
         [InlineData("%revealtaste:Alex:201%revealtaste:Alex:212", "Reveal Item Preference")]
+        [InlineData("[128 130 72]", "Item Pool")]
         public void Resolve_ArgCommand_FallsBackToCommandName(string rawText, string expectedFriendlyName)
         {
             var entry = SyntaxRegistry.Resolve(rawText);

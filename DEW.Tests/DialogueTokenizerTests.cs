@@ -85,5 +85,29 @@ namespace DEW.Tests
             Assert.Equal("%revealtaste:Abigail:(O)66", tokens[0].RawText);
             Assert.Equal("#", tokens[1].RawText);
         }
+
+        [Fact]
+        public void Tokenize_ItemPool_Closed_IsOneStructuralToken()
+        {
+            string raw ="[128 130 72]#$b#Hi";
+
+            var tokens = DialogueTokenizer.Tokenize(raw);
+
+            Assert.Equal(SyntaxKind.Structural, tokens[0].Kind); //checks to see if token[0].kind is structural
+            Assert.Equal("[128 130 72]", tokens[0].RawText); //checks to see if token[0] = [128 130 72]
+            Assert.Equal("#", tokens[1].RawText); //checks to see if token[1] = #
+        }
+
+        [Fact]
+        public void Tokenize_ItemPool_Open_IsUnknownAndStopsAtHash()
+        {
+            string raw = "[128 130 72#$b#Hi";
+
+            var tokens = DialogueTokenizer.Tokenize(raw);
+
+            Assert.Equal(SyntaxKind.Unknown, tokens[0].Kind);
+            Assert.Equal("[128 130 72", tokens[0].RawText);
+            Assert.Equal("#", tokens[1].RawText);
+        }
     }
 }

@@ -109,6 +109,14 @@ namespace DEW.Core
                 continue;
                 }
 
+                if (c == '[' && TryMatchBracketed(raw, i, out Token? pool, out int poolLength))
+                {
+                    FlushText();
+                    tokens.Add(pool);
+                    i += poolLength;
+                    continue;
+                }
+
                 textBuffer.Append(c);
                 i++;
             }
@@ -185,6 +193,30 @@ namespace DEW.Core
 
             token = new Token { Kind = SyntaxKind.Structural, RawText = raw.Substring(pos, j - pos) };
             length = j - pos;
+            return true;
+        }
+
+        private static bool TryMatchBracketed(string raw, int pos,
+            [NotNullWhen(true)] out Token? token, out int length)
+        {
+            token = null;
+            length = 0;
+            
+            if (raw[pos] != '[') return false; //if raw doesn't start with [, return false for this check
+
+            int j = pos +1;
+            while (j < raw.Length && raw[j] != ']' && raw[j] != '#')
+                j++; //walk through raw while current character is not ] or #
+
+            bool closed = j < raw.Length && raw[j] == ']'; //true if ] is present
+            if (closed) j++; //walks past the closed bracket into a new token
+
+            token = new Token
+            {
+                Kind = closed ? SyntaxKind.Structural : SyntaxKind.Unknown,
+                RawText = raw.Substring(pos, j - pos) //if closed, this is structural. If not, it is unknown. Either way, return raw text
+            };
+            length = j - pos; //resets the current position
             return true;
         }
     }

@@ -104,9 +104,15 @@ namespace DEW.Core
 
             new RegistryEntry { Pattern = "%favorite", FriendlyName = "Favorite Thing",
             Description = "Replaced with the player's favorite thing.", Kind = SyntaxKind.Inline },
+
+
+
+            //Special commands
+            new RegistryEntry { Pattern = "[", FriendlyName = "Item Pool",
+            Description = "Gives the player one random item from the IDs inside the brackets.", Kind = SyntaxKind.Structural },
         };
 
-        public static RegistryEntry? Lookup(string rawText) // method to lookup syntax using SyntaxRegistry
+        public static RegistryEntry? Lookup(string rawText) //method to lookup syntax using SyntaxRegistry
         {
             foreach (var entry in Entries)
             {
@@ -122,7 +128,9 @@ namespace DEW.Core
             var exact = Lookup(rawText);
             if (exact != null) return exact; //try look up exact match and if successful, return it
 
-            if (!(rawText.StartsWith("$") || rawText.StartsWith("%"))) return null; //check to see if it starts with $
+            if (rawText.StartsWith("[")) return Lookup("["); //checks for [ and looks up syntax in registry if true
+
+            if (!(rawText.StartsWith("$") || rawText.StartsWith("%"))) return null; //check to see if it starts with $ or %, determined not to be tag if it doesn't
 
             int j = 1;
             while (j < rawText.Length && char.IsLetter(rawText[j])) j++; //walk through command letter
