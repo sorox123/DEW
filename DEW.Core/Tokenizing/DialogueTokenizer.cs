@@ -36,7 +36,8 @@ namespace DEW.Core
 
                 // check for %revealtaste which is helped by TryMatchArgCommand.
                 // propery syntax is %revealtaste either at end of dialogue text or up against # separator, so TryMatchArgCommand fits
-                if (c == '%' && TryMatchArgCommand(raw, i, "%revealtaste", out Token? cmd, out int cmdLength, "#"))
+                // update: You can have one %reveal command butt against the other, added % next to # to help delineate this syntax further.
+                if (c == '%' && TryMatchArgCommand(raw, i, "%revealtaste", out Token? cmd, out int cmdLength, "#%"))
                 {
                     FlushText();
                     tokens.Add(cmd);

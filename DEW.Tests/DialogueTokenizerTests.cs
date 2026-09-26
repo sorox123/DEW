@@ -75,18 +75,6 @@ namespace DEW.Tests
         }
 
         [Fact]
-        public void Tokenize_RevealTaste_SingleStructuralToken()
-        {
-            string raw = "%revealtaste:Abigail:(O)66#$b#Hi";
-
-            var tokens = DialogueTokenizer.Tokenize(raw);
-
-            Assert.Equal(SyntaxKind.Structural, tokens[0].Kind);
-            Assert.Equal("%revealtaste:Abigail:(O)66", tokens[0].RawText);
-            Assert.Equal("#", tokens[1].RawText);
-        }
-
-        [Fact]
         public void Tokenize_ItemPool_Closed_IsOneStructuralToken()
         {
             string raw ="[128 130 72]#$b#Hi";
@@ -105,9 +93,22 @@ namespace DEW.Tests
 
             var tokens = DialogueTokenizer.Tokenize(raw);
 
-            Assert.Equal(SyntaxKind.Unknown, tokens[0].Kind);
-            Assert.Equal("[128 130 72", tokens[0].RawText);
-            Assert.Equal("#", tokens[1].RawText);
+            Assert.Equal(SyntaxKind.Unknown, tokens[0].Kind); //checks to see if this raw text matches Unknown tokenkind
+            Assert.Equal("[128 130 72", tokens[0].RawText); //checks to see if this raw text is its own token
+            Assert.Equal("#", tokens[1].RawText); //checks to make sure # is its own token
+        }
+
+        [Fact]
+        public void Tokenize_RevealTaste_SingleStructuralToken()
+        {
+            string raw = ("%revealtaste:Abigail:(O)66%revealtaste:Abigail:(O)72#Hi");
+
+            var tokens = DialogueTokenizer.Tokenize(raw);
+
+            Assert.Equal("%revealtaste:Abigail:(O)66", tokens[0].RawText); //checks to see if the %revealtaste:Abigail:66 is being tokenized properly
+            Assert.Equal(SyntaxKind.Structural, tokens[1].Kind); //checks to see if the 2nd token matches the syntaxkind (both tokens should match this kind, this is the only test we need)
+            Assert.Equal("%revealtaste:Abigail:(O)72", tokens[1].RawText); //checks to see if %revealtaste:Abigail:72 is being tokenized properly
+            Assert.Equal("#", tokens[2].RawText); //checks to make sure # is its own token
         }
     }
 }
