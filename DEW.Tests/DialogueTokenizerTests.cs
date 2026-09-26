@@ -133,5 +133,28 @@ namespace DEW.Tests
             Assert.Equal("$12", tokens[1].RawText);
             Assert.Equal(SyntaxKind.Portrait, tokens[1].Kind);
         }
+
+        [Fact]
+        public void Tokenize_SayOnce_AtPieceStart_IsStructuralCommand()
+        {
+            string raw = "$1 abbyGift#Here's a gift!";
+
+            var tokens = DialogueTokenizer.Tokenize(raw);
+
+            Assert.Equal("$1 abbyGift", tokens[0].RawText); //checks to see if $1 abbyGift is its own token
+            Assert.Equal(SyntaxKind.Structural, tokens[0].Kind); //checks to see if the SyntaxKind of the token (if it passes) is Structural
+            Assert.Equal("#", tokens[1].RawText); //checks to see if # is its own token
+        }
+
+        [Fact]
+        public void Tokenize_DollarOne_AfterText_IsPortrait()
+        {
+            string raw = "I'm so happy!$1";
+
+            var tokens = DialogueTokenizer.Tokenize(raw);
+
+            Assert.Equal("$1", tokens[1].RawText); //checks to see if $1 is its own token
+            Assert.Equal(SyntaxKind.Portrait, tokens[1].Kind); //checks to see if SyntaxKind of the token (if it passes) is Portrait
+        }
     }
 }

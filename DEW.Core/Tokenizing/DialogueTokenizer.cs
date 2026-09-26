@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 
 
@@ -165,6 +166,11 @@ namespace DEW.Core
             //piroritizes via lambda, so $action doesn't stop reading at $a (the portrait call for angry)
             foreach (var name in ArgCommands)
                 if (TryMatchArgCommand(raw, pos, name, out token, out length)) return true;
+
+            bool startOfPiece = pos == 0 || raw[pos - 1] == '#'; //checks to see if raw is the start of dialogue
+
+            if (startOfPiece && TryMatchArgCommand(raw, pos, "$1", out token, out length)) //if start of dialogue and tryargcommand returns true, return trydollarmarker returns true;
+                return true;
 
             if (char.IsDigit(next)) 
             {
