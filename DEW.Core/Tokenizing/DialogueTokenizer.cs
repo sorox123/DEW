@@ -169,7 +169,9 @@ namespace DEW.Core
 
             bool startOfPiece = pos == 0 || raw[pos - 1] == '#'; //checks to see if raw is the start of dialogue
 
-            if (startOfPiece && TryMatchArgCommand(raw, pos, "$1", out token, out length)) //if start of dialogue and tryargcommand returns true, return trydollarmarker returns true;
+            //if start of dialogue and char at pos + 2 != ' ' and tryargcommand returns true, return trydollarmarker returns true;
+            if (startOfPiece && pos + 2 < raw.Length && raw[pos + 2] == ' '
+                && TryMatchArgCommand(raw, pos, "$1", out token, out length)) 
                 return true;
 
             if (char.IsDigit(next)) 

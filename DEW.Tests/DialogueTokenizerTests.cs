@@ -156,5 +156,16 @@ namespace DEW.Tests
             Assert.Equal("$1", tokens[1].RawText); //checks to see if $1 is its own token
             Assert.Equal(SyntaxKind.Portrait, tokens[1].Kind); //checks to see if SyntaxKind of the token (if it passes) is Portrait
         }
+
+        [Fact]
+        public void Tokenize_Portrait_MultiDigit_AtPieceStart_IsNotSayOnce()
+        {
+            string raw = "$12#Hi";
+
+            var tokens = DialogueTokenizer.Tokenize(raw);
+
+            Assert.Equal("$12", tokens[0].RawText);
+            Assert.Equal(SyntaxKind.Portrait, tokens[0].Kind);
+        }
     }
 }
