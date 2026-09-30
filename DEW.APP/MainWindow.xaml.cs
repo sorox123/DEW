@@ -136,17 +136,16 @@ public partial class MainWindow : Window
 
         foreach (var token in tokens) //for each token, create colored "run" (span of text, such as a word instead of painting whole sentence)
         {
-            var run = new Run(token.RawText) { Foreground = Brushes.Black };
-            var entry = SyntaxRegistry.Resolve(token.RawText);
+            var run = new Run(token.RawText) { Foreground = Brushes.Black }; //colors text black
+            run.Background = BackgroundForKind(token.Kind); //color every token based on kind
 
+            var entry = SyntaxRegistry.Resolve(token.RawText);
             if (entry != null) //if entry isn't null, display info on json formatting
             {
-                run.Background = BackgroundForKind(entry.Kind); //color based on kind
                 ToolTipService.SetToolTip(run, $"{entry.FriendlyName}\n{entry.Description}");
             }
             else if (token.Kind == SyntaxKind.Unknown) //if syntax is unknown, flag it and inform user via tooltip
             {
-                run.Background = BackgroundForKind(SyntaxKind.Unknown); //colors unknowns in gray
                 run.ToolTip = "Unrecognized syntax - kept as-is.";
             }
 
