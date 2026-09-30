@@ -167,5 +167,13 @@ namespace DEW.Tests
             Assert.Equal("$12", tokens[0].RawText);
             Assert.Equal(SyntaxKind.Portrait, tokens[0].Kind);
         }
+
+        [Fact]
+        public void Check_Resolve_ReturnsNull()
+        {
+            var entry = SyntaxRegistry.Resolve("$"); //set entry to the result of calling Resolve on "$"
+
+            Assert.Null(entry); //tests to see if entry is null or not
+        }
     }
 }

@@ -84,6 +84,9 @@ namespace DEW.Core
             new RegistryEntry { Pattern = "$6", FriendlyName = "Portrait: Custom",
             Description = "Shows a custom, mod- or NPC-specific portrait for this box.", Kind = SyntaxKind.Portrait },
 
+            new RegistryEntry { Pattern = "$<n>", FriendlyName = "Portrait: Frame N",
+            Description = "Shows the portrait frame N from this NPC's sheet. Meaning depends on the portrait pack.", Kind = SyntaxKind.Portrait },
+
 
 
             //known %word tokens
@@ -110,6 +113,9 @@ namespace DEW.Core
             //Special commands
             new RegistryEntry { Pattern = "[", FriendlyName = "Item Pool",
             Description = "Gives the player one random item from the IDs inside the brackets.", Kind = SyntaxKind.Structural },
+
+            new RegistryEntry { Pattern = "$1 <id>", FriendlyName = "Say Once",
+            Description = "Shown only once per save; the ID tracks whether the dialogue has been seen.", Kind = SyntaxKind.Structural },
         };
 
         public static RegistryEntry? Lookup(string rawText) //method to lookup syntax using SyntaxRegistry
@@ -131,6 +137,12 @@ namespace DEW.Core
             if (rawText.StartsWith("[")) return Lookup("["); //checks for [ and looks up syntax in registry if true
 
             if (!(rawText.StartsWith("$") || rawText.StartsWith("%"))) return null; //check to see if it starts with $ or %, determined not to be tag if it doesn't
+
+            if (rawText.StartsWith("$1 ")) return Lookup("$1 <id>"); //check to see if rawText starts with $1
+
+            //check to see if starts with $ and is followed by a digit but only if text is longer than 1
+            if (rawText.Length > 1 && rawText.StartsWith("$") && char.IsDigit(rawText[1]))
+                return Lookup("$<n>");
 
             int j = 1;
             while (j < rawText.Length && char.IsLetter(rawText[j])) j++; //walk through command letter
