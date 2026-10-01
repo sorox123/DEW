@@ -84,8 +84,8 @@ namespace DEW.Core
             new RegistryEntry { Pattern = "$6", FriendlyName = "Portrait: Custom",
             Description = "Shows a custom, mod- or NPC-specific portrait for this box.", Kind = SyntaxKind.Portrait },
 
-            new RegistryEntry { Pattern = "$<n>", FriendlyName = "Portrait: Frame N",
-            Description = "Shows the portrait frame N from this NPC's sheet. Meaning depends on the portrait pack.", Kind = SyntaxKind.Portrait },
+            new RegistryEntry { Pattern = "$<n>", FriendlyName = "Portrait: Frame {n}",
+            Description = "Shows the portrait frame {n} from this NPC's sheet. Meaning depends on the portrait pack.", Kind = SyntaxKind.Portrait },
 
 
 
@@ -142,7 +142,22 @@ namespace DEW.Core
 
             //check to see if starts with $ and is followed by a digit but only if text is longer than 1
             if (rawText.Length > 1 && rawText.StartsWith("$") && char.IsDigit(rawText[1]))
-                return Lookup("$<n>");
+            {
+                var template = Lookup("$<n>");
+                if (template == null) return null;
+
+                string n = rawText.Substring(1);
+
+                return new RegistryEntry
+                {
+                    Pattern = template.Pattern, //creates a new template
+                    FriendlyName = template.FriendlyName.Replace("{n}", n), //replaces placeholder n with the entered value for FriendlyName
+                    Description = template.Description.Replace("{n}", n), //replaces placeholder n with the entered value for Description
+                    Kind = template.Kind, //syntax kind
+                    Arguments = template.Arguments,
+                    RequiresModId = template.RequiresModId 
+                };
+            }
 
             int j = 1;
             while (j < rawText.Length && char.IsLetter(rawText[j])) j++; //walk through command letter

@@ -79,11 +79,20 @@ namespace DEW.Tests
         [InlineData("%revealtaste:Abigail:(O)66", "Reveal Item Preference")]
         [InlineData("%revealtaste:Alex:201%revealtaste:Alex:212", "Reveal Item Preference")]
         [InlineData("[128 130 72]", "Item Pool")]
-        [InlineData("$12", "Portrait: Frame N")]
-        [InlineData("$7", "Portrait: Frame N")]
         [InlineData("$1 abbyGift", "Say Once")]
         [InlineData("$1", "Portrait: Happy")]
         public void Resolve_ArgCommand_FallsBackToCommandName(string rawText, string expectedFriendlyName)
+        {
+            var entry = SyntaxRegistry.Resolve(rawText);
+
+            Assert.NotNull(entry);
+            Assert.Equal(expectedFriendlyName, entry!.FriendlyName);
+        }
+
+        [Theory]
+        [InlineData("$12", "Portrait: Frame 12")]
+        [InlineData("$7", "Portrait: Frame 7")]
+        public void Resolve_NumberedPortrait_FillsFrameNumber(string rawText, string expectedFriendlyName)
         {
             var entry = SyntaxRegistry.Resolve(rawText);
 
