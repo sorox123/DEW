@@ -150,7 +150,7 @@ namespace DEW.Core
 
                 return new RegistryEntry
                 {
-                    Pattern = template.Pattern, //creates a new template
+                    Pattern = template.Pattern, //copies the template's pattern
                     FriendlyName = template.FriendlyName.Replace("{n}", n), //replaces placeholder n with the entered value for FriendlyName
                     Description = template.Description.Replace("{n}", n), //replaces placeholder n with the entered value for Description
                     Kind = template.Kind, //syntax kind

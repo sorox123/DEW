@@ -169,11 +169,35 @@ namespace DEW.Tests
         }
 
         [Fact]
-        public void Check_Resolve_ReturnsNull()
+        public void Tokenize_GenderSplit_ProducesTextSplitterText()
         {
-            var entry = SyntaxRegistry.Resolve("$"); //set entry to the result of calling Resolve on "$"
+            //arrange
+            var input = "You look nice.^You look pretty.";
 
-            Assert.Null(entry); //tests to see if entry is null or not
+            //Act
+            var tokens = DialogueTokenizer.Tokenize(input);
+
+            //Asserts
+            Assert.Equal(3, tokens.Count);
+
+            Assert.Equal(SyntaxKind.Text, tokens[0].Kind);
+            Assert.Equal("You look nice.", tokens[0].RawText);
+
+            Assert.Equal(SyntaxKind.Splitter, tokens[1].Kind);
+            Assert.Equal("^", tokens[1].RawText);
+
+            Assert.Equal(SyntaxKind.Text, tokens[2].Kind);
+            Assert.Equal("You look pretty.", tokens[2].RawText);
+        }
+
+        [Fact]
+        public void Tokenize_PortraitA_StillPortraitAfterActionAdded()
+        {
+            var tokens = DialogueTokenizer.Tokenize("Hmph.$a");
+
+            Assert.Equal(2, tokens.Count);
+            Assert.Equal(SyntaxKind.Portrait, tokens[1].Kind);
+            Assert.Equal("$a", tokens[1].RawText);
         }
     }
 }
