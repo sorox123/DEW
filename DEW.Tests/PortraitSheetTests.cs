@@ -25,5 +25,17 @@ namespace DEW.Tests
 
             Assert.Equal(expectedCount, count);
         }
+
+        [Theory]
+        [InlineData("Hi!$10", 1)] //first frame that doesn't exist
+        [InlineData("Hi!$9", 0)] //last frame that does exist
+        public void Check_PortraitAtSheetEdge_FlagsOnlyOutOfBounds(string raw, int expectedCount)
+        {
+            var tokens = DialogueTokenizer.Tokenize(raw);
+
+            var findings = PortraitLinter.Check(tokens, 128, 320);
+
+            Assert.Equal(expectedCount, findings.Count); // checks to see if the number of findings matches the expected count of findings
+        }
     }
 }

@@ -2,6 +2,6 @@ namespace DEW.Core;
 
 public enum LintSeverity
 {
-    Warning,
-    Error
+    Warning, //game will work around this.
+    Error //breaks the game.
 }

@@ -122,6 +122,13 @@ namespace DEW.Core
                 textBuffer.Append(c);
                 i++;
             }
+            int offset = 0; //set the offset to 0 for the first token
+            foreach (var t in tokens) //for every token in the list do the following
+            {
+                t.Position = offset; //set the position of the token to the current offset (starting at 0)
+                offset += t.RawText.Length; //increment the offset by the length of the current token's raw text
+            }
+
 
             FlushText();
             return tokens;

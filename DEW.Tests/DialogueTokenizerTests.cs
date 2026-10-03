@@ -199,5 +199,14 @@ namespace DEW.Tests
             Assert.Equal(SyntaxKind.Portrait, tokens[1].Kind);
             Assert.Equal("$a", tokens[1].RawText);
         }
+
+        [Fact]
+        public void Tokenize_PortraitAfterText_HasCorrectPosition()
+        {
+            var tokens = DialogueTokenizer.Tokenize("Hi!$999");
+
+            Assert.Equal(0, tokens[0].Position); //first token should start at "H" for "Hi!"
+            Assert.Equal(3, tokens[1].Position); //second token should start at "$" for "$999"
+        }
     }
 }
